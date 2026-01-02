@@ -95,7 +95,7 @@ This boilerplate intentionally ships without a built-in payment provider to maxi
 
 | Category         | Technology                         |
 | ---------------- | ---------------------------------- |
-| Framework        | Next.js 16 (App Router, Turbopack) |
+| Framework        | Next.js 16 (App Router)            |
 | Language         | TypeScript                         |
 | Styling          | Tailwind CSS v4                    |
 | UI Components    | Shadcn/ui (47+ components)         |
