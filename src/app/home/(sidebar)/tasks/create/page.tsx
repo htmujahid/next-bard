@@ -1,14 +1,10 @@
-import { withAuthenticate } from '@/components/acccess/with-authenticate';
-import { Page, PageTitleBar } from '@/components/page';
+import { Shell } from '@/components/layout/shell';
 import { CreateTaskForm } from '@/components/tasks/create-task-form';
 
-function CreateTaskPage() {
+export default async function CreateTaskPage() {
   return (
-    <Page>
-      <PageTitleBar title="Create Task" description="Create a new task" />
+    <Shell>
       <CreateTaskForm />
-    </Page>
+    </Shell>
   );
 }
-
-export default withAuthenticate(CreateTaskPage);

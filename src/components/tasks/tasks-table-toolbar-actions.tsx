@@ -7,7 +7,7 @@ import { Download, Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import type { Task } from '@/db/schema';
-import { exportTableToCSV } from '@/lib/data-table/export';
+import { exportTableToCSV } from '@/lib/export';
 
 import { DeleteTasksDialog } from './delete-tasks-dialog';
 

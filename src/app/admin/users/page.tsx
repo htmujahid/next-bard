@@ -3,9 +3,8 @@ import { headers } from 'next/headers';
 import { z } from 'zod';
 
 import { UsersList } from '@/components/admin/users-list';
+import { Shell } from '@/components/layout/shell';
 import { auth } from '@/lib/auth';
-
-type User = (typeof auth.$Infer.Session)['user'];
 
 const searchSchema = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -56,11 +55,11 @@ export default async function UsersPage({
   });
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
+    <Shell>
       <UsersList
-        data={data.users as Array<User>}
+        data={data.users}
         pageCount={Math.ceil(data.total / perPage)}
       />
-    </div>
+    </Shell>
   );
 }

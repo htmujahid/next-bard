@@ -1,16 +1,17 @@
 import * as React from 'react';
 
-import Link from 'next/link';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { PlusIcon } from 'lucide-react';
-
-import { withAuthenticate } from '@/components/acccess/with-authenticate';
 import { DataTableSkeleton } from '@/components/data-table/data-table-skeleton';
-import { Page, PageTitleBar } from '@/components/page';
+import { Shell } from '@/components/layout/shell';
 import { TasksTable } from '@/components/tasks/tasks-table';
-import { Button } from '@/components/ui/button';
-import { getValidFilters } from '@/lib/data-table/data-table';
-import { client } from '@/orpc';
+import {
+  getTaskEstimatedHoursRange,
+  getTaskPriorityCounts,
+  getTaskStatusCounts,
+  getTasks,
+} from '@/db/queries/tasks';
+import { getValidFilters } from '@/lib/data-table';
 import type { SearchParams } from '@/types';
 import { searchParamsCache } from '@/validators/tasks';
 
@@ -18,32 +19,47 @@ interface IndexPageProps {
   searchParams: Promise<SearchParams>;
 }
 
-async function IndexPage(props: IndexPageProps) {
-  const searchParams = await props.searchParams;
+async function getCachedTasks(searchParams: SearchParams) {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('tasks');
+
   const search = searchParamsCache.parse(searchParams);
-
   const validFilters = getValidFilters(search.filters);
+  return await getTasks({ ...search, filters: validFilters });
+}
 
+async function getCachedTaskStatusCounts() {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('tasks');
+  return await getTaskStatusCounts();
+}
+
+async function getCachedTaskPriorityCounts() {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('tasks');
+  return await getTaskPriorityCounts();
+}
+
+async function getCachedTaskEstimatedHoursRange() {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('tasks');
+  return await getTaskEstimatedHoursRange();
+}
+
+export default async function IndexPage(props: IndexPageProps) {
   const promises = Promise.all([
-    client.tasks.list({
-      ...search,
-      filters: validFilters,
-    }),
-    client.tasks.statusCounts(),
-    client.tasks.priorityCounts(),
-    client.tasks.estimatedHoursRange()
-  ])
+    getCachedTasks(await props.searchParams),
+    getCachedTaskStatusCounts(),
+    getCachedTaskPriorityCounts(),
+    getCachedTaskEstimatedHoursRange(),
+  ]);
 
   return (
-    <Page>
-      <PageTitleBar title="Tasks" description="Manage your tasks">
-        <Link href="/home/tasks/create">
-          <Button>
-            <PlusIcon />
-            New Task
-          </Button>
-        </Link>
-      </PageTitleBar>
+    <Shell>
       <React.Suspense
         fallback={
           <DataTableSkeleton
@@ -64,8 +80,6 @@ async function IndexPage(props: IndexPageProps) {
       >
         <TasksTable promises={promises} />
       </React.Suspense>
-    </Page>
+    </Shell>
   );
 }
-
-export default withAuthenticate(IndexPage);

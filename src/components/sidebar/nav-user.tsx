@@ -12,7 +12,6 @@ import {
   UserCircle,
 } from 'lucide-react';
 
-import { HasRole } from '@/components/acccess/has-role';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -30,7 +29,9 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import pathsConfig from '@/config/paths.config';
-import { authClient } from '@/lib/auth/auth-client';
+import { authClient } from '@/lib/auth-client';
+
+import { If } from '../misc/if';
 
 export function NavUser({
   user,
@@ -39,6 +40,7 @@ export function NavUser({
     name: string;
     email: string;
     avatar?: string;
+    role?: string;
   };
 }) {
   const router = useRouter();
@@ -98,14 +100,14 @@ export function NavUser({
                   Security
                 </DropdownMenuItem>
               </Link>
-              <HasRole role="admin">
+              <If condition={user?.role?.split(',').includes('admin')}>
                 <Link href={pathsConfig.admin.root}>
                   <DropdownMenuItem>
                     <ShieldUser />
                     Admin
                   </DropdownMenuItem>
                 </Link>
-              </HasRole>
+              </If>
               <Link href={pathsConfig.app.preferences}>
                 <DropdownMenuItem>
                   <Palette />

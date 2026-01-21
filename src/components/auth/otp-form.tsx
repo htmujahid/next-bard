@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { authClient } from '@/lib/auth/auth-client';
+import { authClient } from '@/lib/auth-client';
 import { OtpSchema, otpSchema } from '@/validators/auth';
 
 export function OtpForm() {

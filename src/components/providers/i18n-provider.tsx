@@ -3,6 +3,8 @@
 import type { InitOptions, i18n } from 'i18next';
 
 import { initializeI18nClient } from '@/lib/i18n/i18n-client';
+import { i18nResolver } from '@/lib/i18n/i18n-resolver';
+import { getI18nSettings } from '@/lib/i18n/i18n-settings';
 
 let i18nInstance: i18n;
 
@@ -12,14 +14,13 @@ type Resolver = (
 ) => Promise<Record<string, string>>;
 
 export function I18nProvider({
-  settings,
+  lang,
   children,
-  resolver,
 }: React.PropsWithChildren<{
-  settings: InitOptions;
-  resolver: Resolver;
+  lang: string;
 }>) {
-  useI18nClient(settings, resolver);
+  const settings = getI18nSettings(lang);
+  useI18nClient(settings, i18nResolver);
 
   return children;
 }

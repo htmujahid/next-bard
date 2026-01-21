@@ -5,6 +5,7 @@ import * as React from 'react';
 import Link from 'next/link';
 
 import type { Column, ColumnDef } from '@tanstack/react-table';
+import { UserWithRole } from 'better-auth/client/plugins';
 import { CheckCircle2, Text, XCircle } from 'lucide-react';
 
 import { DataTable } from '@/components/data-table/data-table';
@@ -14,21 +15,18 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDataTable } from '@/hooks/use-data-table';
-import { authClient } from '@/lib/auth/auth-client';
 
 import { UserCreateDialog } from './user-create';
 import { UserListActions } from './users-list-actions';
-
-type User = (typeof authClient.$Infer.Session)['user'];
 
 export function UsersList({
   data,
   pageCount,
 }: {
-  data: Array<User>;
+  data: Array<UserWithRole>;
   pageCount: number;
 }) {
-  const columns = React.useMemo<Array<ColumnDef<User>>>(
+  const columns = React.useMemo<Array<ColumnDef<UserWithRole>>>(
     () => [
       {
         id: 'select',
@@ -58,8 +56,8 @@ export function UsersList({
       {
         id: 'name',
         accessorKey: 'name',
-        header: ({ column }: { column: Column<User, unknown> }) => (
-          <DataTableColumnHeader column={column} title="Name" />
+        header: ({ column }: { column: Column<UserWithRole, unknown> }) => (
+          <DataTableColumnHeader column={column} label="Name" />
         ),
         cell: ({ row }) => (
           <Link
@@ -97,11 +95,11 @@ export function UsersList({
       {
         id: 'email',
         accessorKey: 'email',
-        header: ({ column }: { column: Column<User, unknown> }) => (
-          <DataTableColumnHeader column={column} title="Email" />
+        header: ({ column }: { column: Column<UserWithRole, unknown> }) => (
+          <DataTableColumnHeader column={column} label="Email" />
         ),
         cell: ({ cell }) => {
-          const email = cell.getValue<User['email']>();
+          const email = cell.getValue<UserWithRole['email']>();
 
           return <div>{email}</div>;
         },
@@ -109,11 +107,11 @@ export function UsersList({
       {
         id: 'emailVerified',
         accessorKey: 'emailVerified',
-        header: ({ column }: { column: Column<User, unknown> }) => (
-          <DataTableColumnHeader column={column} title="Email Verified" />
+        header: ({ column }: { column: Column<UserWithRole, unknown> }) => (
+          <DataTableColumnHeader column={column} label="Email Verified" />
         ),
         cell: ({ cell }) => {
-          const emailVerified = cell.getValue<User['emailVerified']>();
+          const emailVerified = cell.getValue<UserWithRole['emailVerified']>();
           const Icon = emailVerified ? CheckCircle2 : XCircle;
 
           return (
@@ -127,11 +125,11 @@ export function UsersList({
       {
         id: 'banned',
         accessorKey: 'banned',
-        header: ({ column }: { column: Column<User, unknown> }) => (
-          <DataTableColumnHeader column={column} title="Banned" />
+        header: ({ column }: { column: Column<UserWithRole, unknown> }) => (
+          <DataTableColumnHeader column={column} label="Banned" />
         ),
         cell: ({ cell }) => {
-          const banned = cell.getValue<User['banned']>();
+          const banned = cell.getValue<UserWithRole['banned']>();
           const Icon = banned ? CheckCircle2 : XCircle;
 
           return (
@@ -145,11 +143,11 @@ export function UsersList({
       {
         id: 'role',
         accessorKey: 'role',
-        header: ({ column }: { column: Column<User, unknown> }) => (
-          <DataTableColumnHeader column={column} title="Role" />
+        header: ({ column }: { column: Column<UserWithRole, unknown> }) => (
+          <DataTableColumnHeader column={column} label="Role" />
         ),
         cell: ({ cell }) => {
-          const role = cell.getValue<User['role']>();
+          const role = cell.getValue<UserWithRole['role']>();
 
           return <div className="flex items-center gap-1">{role}</div>;
         },
@@ -166,11 +164,11 @@ export function UsersList({
       {
         id: 'createdAt',
         accessorKey: 'createdAt',
-        header: ({ column }: { column: Column<User, unknown> }) => (
-          <DataTableColumnHeader column={column} title="Created At" />
+        header: ({ column }: { column: Column<UserWithRole, unknown> }) => (
+          <DataTableColumnHeader column={column} label="Created At" />
         ),
         cell: ({ cell }) => {
-          const createdAt = cell.getValue<User['createdAt']>();
+          const createdAt = cell.getValue<UserWithRole['createdAt']>();
 
           return (
             <div>

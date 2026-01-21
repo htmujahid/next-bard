@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 
-import { SelectTrigger } from '@radix-ui/react-select';
-import type { Table } from '@tanstack/react-table';
 import { onError, onSuccess } from '@orpc/client';
 import { useServerAction } from '@orpc/react/hooks';
+import { SelectTrigger } from '@radix-ui/react-select';
+import type { Table } from '@tanstack/react-table';
 import { ArrowUp, CheckCircle2, Download, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -22,9 +22,9 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { type Task, tasks } from '@/db/schema';
-import { exportTableToCSV } from '@/lib/data-table/export';
-import { deleteManyTasks } from '@/orpc/actions/tasks/delete-many-task';
-import { updateManyTasks } from '@/orpc/actions/tasks/update-many-task';
+import { exportTableToCSV } from '@/lib/export';
+import { deleteTasksAction } from '@/orpc/actions/tasks/delete-tasks-action';
+import { updateTasksAction } from '@/orpc/actions/tasks/update-tasks-action';
 
 export const actions = [
   'update-status',
@@ -44,28 +44,30 @@ export function TasksTableActionBar({ table }: TasksTableActionBarProps) {
   const [isExporting, startExportTransition] = React.useTransition();
   const [currentAction, setCurrentAction] = React.useState<Action | null>(null);
 
-  const { execute: executeUpdateMany, status: updateManyStatus } = useServerAction(updateManyTasks, {
-    interceptors: [
-      onSuccess(() => {
-        toast.success('Tasks updated');
-      }),
-      onError((error) => {
-        toast.error(error.message || 'Failed to update tasks');
-      }),
-    ],
-  });
+  const { execute: executeUpdateMany, status: updateManyStatus } =
+    useServerAction(updateTasksAction, {
+      interceptors: [
+        onSuccess(() => {
+          toast.success('Tasks updated');
+        }),
+        onError((error) => {
+          toast.error(error.message || 'Failed to update tasks');
+        }),
+      ],
+    });
 
-  const { execute: executeDeleteMany, status: deleteManyStatus } = useServerAction(deleteManyTasks, {
-    interceptors: [
-      onSuccess(() => {
-        toast.success('Tasks deleted');
-        table.toggleAllRowsSelected(false);
-      }),
-      onError((error) => {
-        toast.error(error.message || 'Failed to delete tasks');
-      }),
-    ],
-  });
+  const { execute: executeDeleteMany, status: deleteManyStatus } =
+    useServerAction(deleteTasksAction, {
+      interceptors: [
+        onSuccess(() => {
+          toast.success('Tasks deleted');
+          table.toggleAllRowsSelected(false);
+        }),
+        onError((error) => {
+          toast.error(error.message || 'Failed to delete tasks');
+        }),
+      ],
+    });
 
   const getIsActionPending = React.useCallback(
     (action: Action) => {

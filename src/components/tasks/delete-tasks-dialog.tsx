@@ -4,9 +4,9 @@ import * as React from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import type { Row } from '@tanstack/react-table';
 import { onError, onSuccess } from '@orpc/client';
 import { useServerAction } from '@orpc/react/hooks';
+import type { Row } from '@tanstack/react-table';
 import { Loader, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/drawer';
 import type { Task } from '@/db/schema';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { deleteManyTasks } from '@/orpc/actions/tasks/delete-many-task';
+import { deleteTasksAction } from '@/orpc/actions/tasks/delete-tasks-action';
 
 interface DeleteTasksDialogProps extends React.ComponentPropsWithoutRef<
   typeof Dialog
@@ -54,7 +54,7 @@ export function DeleteTasksDialog({
   const router = useRouter();
   const isDesktop = useMediaQuery('(min-width: 640px)');
 
-  const { execute, status } = useServerAction(deleteManyTasks, {
+  const { execute, status } = useServerAction(deleteTasksAction, {
     interceptors: [
       onSuccess(() => {
         props.onOpenChange?.(false);

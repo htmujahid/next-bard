@@ -1,6 +1,8 @@
 import Link from 'next/link';
 
-export function Footer() {
+export async function Footer() {
+  'use cache';
+  const year = new Date().getFullYear();
   return (
     <footer className="w-full py-6">
       <div className="container px-4 md:px-6">
@@ -15,7 +17,7 @@ export function Footer() {
             </Link>
           </div>
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} Your Company. All rights reserved.
+            © {year} Your Company. All rights reserved.
           </p>
         </div>
       </div>

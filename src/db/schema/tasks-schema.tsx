@@ -7,7 +7,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 
-import { generateId } from '@/lib/data-table/id';
+import { generateId } from '@/lib/id';
 
 export const tasks = pgTable('tasks', {
   id: varchar('id', { length: 30 })

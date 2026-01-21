@@ -3,9 +3,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { User } from 'better-auth';
+import { UserWithRole } from 'better-auth/plugins';
 
-import { HasRole } from '@/components/acccess/has-role';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,9 +17,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import pathsConfig from '@/config/paths.config';
-import { authClient } from '@/lib/auth/auth-client';
+import { authClient } from '@/lib/auth-client';
 
-export function NavUser({ user }: { user: User }) {
+import { If } from '../misc/if';
+
+export function NavUser({ user }: { user: UserWithRole }) {
   const router = useRouter();
 
   return (
@@ -50,11 +51,11 @@ export function NavUser({ user }: { user: User }) {
           <Link href={pathsConfig.app.security}>
             <DropdownMenuItem>Security</DropdownMenuItem>
           </Link>
-          <HasRole role="admin">
+          <If condition={user?.role?.split(',').includes('admin')}>
             <Link href={pathsConfig.admin.root}>
               <DropdownMenuItem>Admin</DropdownMenuItem>
             </Link>
-          </HasRole>
+          </If>
           <Link href={pathsConfig.app.preferences}>
             <DropdownMenuItem>Preferences</DropdownMenuItem>
           </Link>

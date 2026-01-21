@@ -1,7 +1,9 @@
+'use client';
+
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
-import { authClient } from '@/lib/auth/auth-client';
-import { allRoles } from '@/lib/auth/roles';
+import { authClient } from '@/lib/auth-client';
+import { allRoles } from '@/lib/roles';
 
 type AuthSession = typeof authClient.$Infer.Session;
 

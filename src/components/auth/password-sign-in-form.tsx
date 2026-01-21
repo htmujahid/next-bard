@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -22,15 +23,12 @@ import {
 import { Input } from '@/components/ui/input';
 import appConfig from '@/config/app.config';
 import pathsConfig from '@/config/paths.config';
-import { authClient } from '@/lib/auth/auth-client';
+import { authClient } from '@/lib/auth-client';
 import { SignInSchema, signInSchema } from '@/validators/auth';
-
-import { AuthError } from './auth-error';
 
 export function PasswordSignInForm() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [error, setError] = useState<string | undefined>(undefined);
 
   const form = useForm<SignInSchema>({
     defaultValues: {
@@ -52,13 +50,12 @@ export function PasswordSignInForm() {
         },
         {
           onSuccess: (context) => {
-            setError(undefined);
             if (context.data.twoFactorRedirect) {
               router.push(appConfig.url + pathsConfig.auth.twoFactor);
             }
           },
           onError: ({ error }) => {
-            setError(error.message);
+            toast.error(error.message);
           },
         },
       );
@@ -68,7 +65,6 @@ export function PasswordSignInForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {error && <AuthError error={error} />}
         <FormField
           name="email"
           render={({ field }) => (

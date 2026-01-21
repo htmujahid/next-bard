@@ -93,23 +93,23 @@ This boilerplate intentionally ships without a built-in payment provider to maxi
 
 ## Tech Stack
 
-| Category         | Technology                         |
-| ---------------- | ---------------------------------- |
-| Framework        | Next.js 16 (App Router)            |
-| Language         | TypeScript                         |
-| Styling          | Tailwind CSS v4                    |
-| UI Components    | Shadcn/ui (47+ components)         |
-| Database         | PostgreSQL with Drizzle ORM        |
-| Authentication   | Better Auth                        |
-| API              | oRPC with OpenAPI                  |
-| State Management | TanStack React Query               |
-| Forms            | React Hook Form + Zod              |
-| Tables           | TanStack React Table               |
-| CMS              | Keystatic                          |
-| Email            | Nodemailer                         |
-| File Storage     | AWS S3 / MinIO                     |
-| Animations       | Motion                             |
-| i18n             | i18next                            |
+| Category         | Technology                  |
+| ---------------- | --------------------------- |
+| Framework        | Next.js 16 (App Router)     |
+| Language         | TypeScript                  |
+| Styling          | Tailwind CSS v4             |
+| UI Components    | Shadcn/ui (47+ components)  |
+| Database         | PostgreSQL with Drizzle ORM |
+| Authentication   | Better Auth                 |
+| API              | oRPC with OpenAPI           |
+| State Management | TanStack React Query        |
+| Forms            | React Hook Form + Zod       |
+| Tables           | TanStack React Table        |
+| CMS              | Keystatic                   |
+| Email            | Nodemailer                  |
+| File Storage     | AWS S3 / MinIO              |
+| Animations       | Motion                      |
+| i18n             | i18next                     |
 
 ## Getting Started
 

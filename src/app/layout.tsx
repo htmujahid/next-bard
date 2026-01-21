@@ -1,12 +1,13 @@
+import { Suspense } from 'react';
+
 import type { Metadata } from 'next';
 
 import { Geist, Geist_Mono } from 'next/font/google';
 import { cookies } from 'next/headers';
 
-import { getSession } from '@/orpc/actions/user/get-session';
 import { RootProviders } from '@/components/providers/root-provider';
 import { Toaster } from '@/components/ui/sonner';
-import { createI18nServerInstance } from '@/lib/i18n/i18n-server';
+import appConfig from '@/config/app.config';
 import '@/orpc/server';
 
 import './globals.css';
@@ -22,8 +23,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Next Bard',
-  description: 'Next Bard',
+  title: appConfig.title,
+  description: appConfig.description,
 };
 
 export default async function RootLayout({
@@ -31,18 +32,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [_, auth] = await getSession();
-  const { language } = await createI18nServerInstance();
-  const theme = await getRootTheme();
-
   return (
-    <html lang={language}>
+    <html lang={'en'}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <RootProviders lang={language} theme={theme} auth={auth ?? null}>
-          {children}
-        </RootProviders>
+        <Suspense fallback={<div>Loading...</div>}>
+          <RootProviders>{children}</RootProviders>
+        </Suspense>
         <Toaster />
       </body>
     </html>

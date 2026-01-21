@@ -4,16 +4,17 @@ import * as React from 'react';
 
 import Link from 'next/link';
 
-import type { ColumnDef } from '@tanstack/react-table';
-import { onError, onSuccess } from '@orpc/client';
-import { useServerAction } from '@orpc/react/hooks';
+import type { ColumnDef, Row } from '@tanstack/react-table';
 import {
   ArrowUpDown,
   CalendarIcon,
   CircleDashed,
   Clock,
   Ellipsis,
+  Eye,
+  Pencil,
   Text,
+  Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -28,17 +29,97 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { type Task, tasks } from '@/db/schema';
+import type { Task } from '@/db/schema';
+import { tasks } from '@/db/schema';
 import { formatDate } from '@/lib/format';
-import { getPriorityIcon, getStatusIcon } from '@/lib/tasks';
-import { updateTask } from '@/orpc/actions/tasks/update-task';
+import { updateTaskAction } from '@/orpc/actions/tasks/update-task-action';
 import type { DataTableRowAction } from '@/types/data-table';
+
+import { getPriorityIcon, getStatusIcon } from './utils';
+
+interface TaskActionsCellProps {
+  row: Row<Task>;
+  setRowAction: React.Dispatch<
+    React.SetStateAction<DataTableRowAction<Task> | null>
+  >;
+}
+
+function TaskActionsCell({ row, setRowAction }: TaskActionsCellProps) {
+  const [isPending, startTransition] = React.useTransition();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label="Open menu"
+          variant="ghost"
+          className="data-[state=open]:bg-muted flex size-8 p-0"
+        >
+          <Ellipsis className="size-4" aria-hidden="true" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-40">
+        <DropdownMenuItem asChild>
+          <Link href={`/home/tasks/${row.original.id}`}>
+            <Eye className="size-4" />
+            View
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/home/tasks/${row.original.id}/update`}>
+            <Pencil className="size-4" />
+            Edit
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuRadioGroup
+              value={row.original.label}
+              onValueChange={(value) => {
+                startTransition(async () => {
+                  const [error] = await updateTaskAction({
+                    id: row.original.id,
+                    label: value as Task['label'],
+                  });
+                  if (error) {
+                    toast.error(error.message);
+                    return;
+                  }
+                  toast.success('Label updated');
+                });
+              }}
+            >
+              {tasks.label.enumValues.map((label) => (
+                <DropdownMenuRadioItem
+                  key={label}
+                  value={label}
+                  className="capitalize"
+                  disabled={isPending}
+                >
+                  {label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          variant="destructive"
+          onSelect={() => setRowAction({ row, variant: 'delete' })}
+        >
+          <Trash2 className="size-4" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 interface GetTasksTableColumnsProps {
   statusCounts: Record<Task['status'], number>;
@@ -54,38 +135,38 @@ export function getTasksTableColumns({
   priorityCounts,
   estimatedHoursRange,
   setRowAction,
-}: GetTasksTableColumnsProps): ColumnDef<Task>[] {
+}: GetTasksTableColumnsProps): Array<ColumnDef<Task>> {
   return [
     {
       id: 'select',
       header: ({ table }) => (
         <Checkbox
+          aria-label="Select all"
+          className="translate-y-0.5"
           checked={
             table.getIsAllPageRowsSelected() ||
             (table.getIsSomePageRowsSelected() && 'indeterminate')
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-0.5"
         />
       ),
       cell: ({ row }) => (
         <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
           className="translate-y-0.5"
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
         />
       ),
-      enableSorting: false,
       enableHiding: false,
+      enableSorting: false,
       size: 40,
     },
     {
       id: 'code',
       accessorKey: 'code',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Task" />
+        <DataTableColumnHeader column={column} label="Task" />
       ),
       cell: ({ row }) => <div className="w-20">{row.getValue('code')}</div>,
       enableSorting: false,
@@ -95,7 +176,7 @@ export function getTasksTableColumns({
       id: 'title',
       accessorKey: 'title',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Title" />
+        <DataTableColumnHeader column={column} label="Title" />
       ),
       cell: ({ row }) => {
         const label = tasks.label.enumValues.find(
@@ -105,7 +186,7 @@ export function getTasksTableColumns({
         return (
           <div className="flex items-center gap-2">
             {label && <Badge variant="outline">{label}</Badge>}
-            <span className="max-w-[31.25rem] truncate font-medium">
+            <span className="max-w-125 truncate font-medium">
               {row.getValue('title')}
             </span>
           </div>
@@ -123,7 +204,7 @@ export function getTasksTableColumns({
       id: 'status',
       accessorKey: 'status',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Status" />
+        <DataTableColumnHeader column={column} label="Status" />
       ),
       cell: ({ cell }) => {
         const status = tasks.status.enumValues.find(
@@ -158,7 +239,7 @@ export function getTasksTableColumns({
       id: 'priority',
       accessorKey: 'priority',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Priority" />
+        <DataTableColumnHeader column={column} label="Priority" />
       ),
       cell: ({ cell }) => {
         const priority = tasks.priority.enumValues.find(
@@ -193,7 +274,7 @@ export function getTasksTableColumns({
       id: 'estimatedHours',
       accessorKey: 'estimatedHours',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Est. Hours" />
+        <DataTableColumnHeader column={column} label="Est. Hours" />
       ),
       cell: ({ cell }) => {
         const estimatedHours = cell.getValue<number>();
@@ -212,7 +293,7 @@ export function getTasksTableColumns({
       id: 'createdAt',
       accessorKey: 'createdAt',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Created At" />
+        <DataTableColumnHeader column={column} label="Created At" />
       ),
       cell: ({ cell }) => formatDate(cell.getValue<Date>()),
       meta: {
@@ -225,69 +306,7 @@ export function getTasksTableColumns({
     {
       id: 'actions',
       cell: function Cell({ row }) {
-        const { execute, status } = useServerAction(updateTask, {
-          interceptors: [
-            onSuccess(() => {
-              toast.success('Label updated');
-            }),
-            onError((error) => {
-              toast.error(error.message || 'Failed to update label');
-            }),
-          ],
-        });
-
-        const isUpdatePending = status === 'pending';
-
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                aria-label="Open menu"
-                variant="ghost"
-                className="data-[state=open]:bg-muted flex size-8 p-0"
-              >
-                <Ellipsis className="size-4" aria-hidden="true" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <Link href={`/home/tasks/${row.original.id}/update`}>
-                <DropdownMenuItem>Edit</DropdownMenuItem>
-              </Link>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <DropdownMenuRadioGroup
-                    value={row.original.label}
-                    onValueChange={(value) => {
-                      execute({
-                        id: row.original.id,
-                        label: value as Task['label'],
-                      });
-                    }}
-                  >
-                    {tasks.label.enumValues.map((label) => (
-                      <DropdownMenuRadioItem
-                        key={label}
-                        value={label}
-                        className="capitalize"
-                        disabled={isUpdatePending}
-                      >
-                        {label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onSelect={() => setRowAction({ row, variant: 'delete' })}
-              >
-                Delete
-                <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
+        return <TaskActionsCell row={row} setRowAction={setRowAction} />;
       },
       size: 40,
     },

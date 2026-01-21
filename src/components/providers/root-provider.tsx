@@ -1,37 +1,26 @@
-'use client';
-
-import { useMemo } from 'react';
+import { headers } from 'next/headers';
 
 import { ThemeProvider } from 'next-themes';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
+import { getRootTheme } from '@/app/layout';
 import { AuthProvider } from '@/components/providers/auth-provider';
 import { I18nProvider } from '@/components/providers/i18n-provider';
 import appConfig from '@/config/app.config';
-import { authClient } from '@/lib/auth/auth-client';
-import { i18nResolver } from '@/lib/i18n/i18n-resolver';
-import { getI18nSettings } from '@/lib/i18n/i18n-settings';
+import { createI18nServerInstance } from '@/lib/i18n/i18n-server';
+import { getSession } from '@/orpc/actions/auth/get-session';
 
 import { ReactQueryProvider } from './react-query-provider';
 
-type AuthSession = typeof authClient.$Infer.Session;
-
-export function RootProviders({
-  lang,
-  theme = appConfig.theme,
-  children,
-  auth,
-}: React.PropsWithChildren<{
-  lang: string;
-  theme?: string;
-  auth: AuthSession | null;
-}>) {
-  const i18nSettings = useMemo(() => getI18nSettings(lang), [lang]);
+export async function RootProviders({ children }: React.PropsWithChildren) {
+  const session = await getSession(await headers());
+  const { language } = await createI18nServerInstance();
+  const theme = (await getRootTheme()) ?? appConfig.theme;
 
   return (
     <ReactQueryProvider>
-      <I18nProvider settings={i18nSettings} resolver={i18nResolver}>
-        <AuthProvider auth={auth}>
+      <I18nProvider lang={language}>
+        <AuthProvider auth={session}>
           <NuqsAdapter>
             <ThemeProvider
               attribute="class"

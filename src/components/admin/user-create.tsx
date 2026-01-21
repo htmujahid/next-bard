@@ -33,9 +33,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { authClient } from '@/lib/auth/auth-client';
-import type { Role } from '@/lib/auth/roles';
-import { rolesData } from '@/lib/auth/roles';
+import { authClient } from '@/lib/auth-client';
+import type { Role } from '@/lib/roles';
+import { rolesData } from '@/lib/roles';
 
 const userCreateFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),

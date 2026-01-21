@@ -1,18 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import {
-  ArrowRight,
-  KeyRound,
-  LayoutDashboard,
-  List,
-  Settings,
-  Shield,
-  Users,
-} from 'lucide-react';
+import { ArrowRight, KeyRound, List, Settings, Shield } from 'lucide-react';
 
-import { requireSession } from '@/orpc/actions/user/require-session';
-import { HasRole } from '@/components/acccess/has-role';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -22,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import pathsConfig from '@/config/paths.config';
+import { requireSession } from '@/orpc/actions/user/require-session';
 
 export default async function HomePage() {
   const [error, session] = await requireSession();
@@ -98,54 +89,6 @@ export default async function HomePage() {
           </CardContent>
         </Card>
       </div>
-
-      <HasRole role="admin">
-        <div>
-          <h2 className="mb-4 text-xl font-semibold">Admin Quick Actions</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  User Management
-                </CardTitle>
-                <Users className="text-muted-foreground h-4 w-4" />
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="mb-4">
-                  Manage users, roles, and permissions.
-                </CardDescription>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/admin/users">
-                    Manage Users
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Admin Dashboard
-                </CardTitle>
-                <LayoutDashboard className="text-muted-foreground h-4 w-4" />
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="mb-4">
-                  Access the full admin dashboard.
-                </CardDescription>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/admin">
-                    Go to Admin
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </HasRole>
-
       <div>
         <h2 className="mb-4 text-xl font-semibold">Account Info</h2>
         <Card>

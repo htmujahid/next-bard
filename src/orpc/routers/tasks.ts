@@ -15,6 +15,7 @@ import {
   sql,
 } from 'drizzle-orm';
 import { customAlphabet } from 'nanoid';
+import z from 'zod';
 
 import { db } from '@/db';
 import { tasks } from '@/db/schema';
@@ -27,26 +28,10 @@ import {
   deleteTaskSchema,
   deleteTasksSchema,
   getTaskSchema,
-  getTasksSchema,
+  listTasksSchema,
   updateTaskSchema,
   updateTasksSchema,
 } from '@/validators/tasks';
-
-// Helper to generate random task for demo purposes
-function generateRandomTask() {
-  const statuses = ['todo', 'in-progress', 'done', 'canceled'] as const;
-  const labels = ['bug', 'feature', 'enhancement', 'documentation'] as const;
-  const priorities = ['low', 'medium', 'high'] as const;
-
-  return {
-    code: `TASK-${customAlphabet('0123456789', 4)()}`,
-    title: `Task ${customAlphabet('abcdefghijklmnopqrstuvwxyz', 8)()}`,
-    status: statuses[Math.floor(Math.random() * statuses.length)],
-    label: labels[Math.floor(Math.random() * labels.length)],
-    priority: priorities[Math.floor(Math.random() * priorities.length)],
-    estimatedHours: Math.floor(Math.random() * 40),
-  };
-}
 
 export const tasksRouter = {
   // Get single task
@@ -76,7 +61,7 @@ export const tasksRouter = {
       tags: ['Tasks'],
     })
     .use(authMiddleware({ permissions: { task: ['read'] } }))
-    .input(getTasksSchema)
+    .input(listTasksSchema)
     .handler(async ({ input }) => {
       const offset = (input.page - 1) * input.perPage;
       const advancedTable =
@@ -327,7 +312,7 @@ export const tasksRouter = {
       tags: ['Tasks'],
     })
     .use(authMiddleware({ permissions: { task: ['update'] } }))
-    .input(updateTaskSchema)
+    .input(updateTaskSchema.extend({ id: z.string() }))
     .handler(async ({ input }) => {
       unstable_noStore();
 
@@ -385,11 +370,7 @@ export const tasksRouter = {
     .handler(async ({ input }) => {
       unstable_noStore();
 
-      await db.transaction(async (tx) => {
-        await tx.delete(tasks).where(eq(tasks.id, input.id));
-        // Create a new task for the deleted one (demo behavior)
-        await tx.insert(tasks).values(generateRandomTask());
-      });
+      await db.delete(tasks).where(eq(tasks.id, input.id));
 
       return { success: true };
     }),
@@ -408,13 +389,7 @@ export const tasksRouter = {
     .handler(async ({ input }) => {
       unstable_noStore();
 
-      await db.transaction(async (tx) => {
-        await tx.delete(tasks).where(inArray(tasks.id, input.ids));
-        // Create new tasks for the deleted ones (demo behavior)
-        await tx
-          .insert(tasks)
-          .values(input.ids.map(() => generateRandomTask()));
-      });
+      await db.delete(tasks).where(inArray(tasks.id, input.ids));
 
       return { success: true };
     }),

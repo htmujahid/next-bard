@@ -21,7 +21,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import type { Permissions, Role } from '@/lib/auth/roles';
+import type { Permissions, Role } from '@/lib/roles';
 
 export type NavDocumentItem = {
   name: string;

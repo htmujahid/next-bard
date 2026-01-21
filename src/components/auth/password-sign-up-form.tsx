@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -18,16 +19,11 @@ import {
 import { Input } from '@/components/ui/input';
 import appConfig from '@/config/app.config';
 import pathsConfig from '@/config/paths.config';
-import { authClient } from '@/lib/auth/auth-client';
+import { authClient } from '@/lib/auth-client';
 import { SignUpSchema, signUpSchema } from '@/validators/auth';
-
-import { AuthError } from './auth-error';
-import { AuthSuccess } from './auth-success';
 
 export function PasswordSignUpForm() {
   const [pending, startTransition] = useTransition();
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [success, setSuccess] = useState<string | undefined>(undefined);
 
   const form = useForm<SignUpSchema>({
     defaultValues: {
@@ -48,14 +44,12 @@ export function PasswordSignUpForm() {
         },
         {
           onSuccess: () => {
-            setError(undefined);
-            setSuccess(
+            toast.success(
               'Account created successfully. Please check your email to verify your account.',
             );
           },
           onError: ({ error }) => {
-            setError(error.message);
-            setSuccess(undefined);
+            toast.error(error.message);
           },
         },
       );
@@ -65,8 +59,6 @@ export function PasswordSignUpForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {error && <AuthError error={error} />}
-        {success && <AuthSuccess message={success} />}
         <FormField
           name="email"
           render={({ field }) => (

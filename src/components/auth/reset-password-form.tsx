@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -16,16 +17,11 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { authClient } from '@/lib/auth/auth-client';
+import { authClient } from '@/lib/auth-client';
 import { ResetPasswordSchema, resetPasswordSchema } from '@/validators/auth';
-
-import { AuthError } from './auth-error';
-import { AuthSuccess } from './auth-success';
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const [pending, startTransition] = useTransition();
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [success, setSuccess] = useState<string | undefined>(undefined);
 
   const form = useForm<ResetPasswordSchema>({
     defaultValues: {
@@ -44,12 +40,10 @@ export function ResetPasswordForm({ token }: { token: string }) {
         },
         {
           onError: ({ error: err }) => {
-            setError(err.message);
-            setSuccess(undefined);
+            toast.error(err.message);
           },
           onSuccess: () => {
-            setError(undefined);
-            setSuccess('Password reset successfully');
+            toast.success('Password reset successfully');
           },
         },
       );
@@ -59,8 +53,6 @@ export function ResetPasswordForm({ token }: { token: string }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {error && <AuthError error={error} />}
-        {success && <AuthSuccess message={success} />}
         <FormField
           control={form.control}
           name="password"

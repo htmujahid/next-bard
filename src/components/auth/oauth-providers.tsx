@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import pathsConfig from '@/config/paths.config';
-import { authClient } from '@/lib/auth/auth-client';
+import { authClient } from '@/lib/auth-client';
 
 const providers = [
   {

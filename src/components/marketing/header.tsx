@@ -1,6 +1,8 @@
 import { headers } from 'next/headers';
 import Link from 'next/link';
 
+import { UserWithRole } from 'better-auth/plugins';
+
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/auth';
 
@@ -56,7 +58,7 @@ export async function Header() {
       </div>
       <div className="flex flex-1 items-center justify-end gap-2">
         {user ? (
-          <NavUser user={user} />
+          <NavUser user={user as UserWithRole} />
         ) : (
           <>
             <Link href="/auth/sign-in">

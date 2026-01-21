@@ -1,130 +1,17 @@
 import {
   createSearchParamsCache,
+  createStandardSchemaV1,
   parseAsArrayOf,
-  parseAsFloat,
   parseAsInteger,
   parseAsString,
   parseAsStringEnum,
 } from 'nuqs/server';
-import { z } from 'zod';
+import * as z from 'zod';
 
-import { flagConfig } from '@/config/flag.config';
 import { type Task, tasks } from '@/db/schema';
-import {
-  getFiltersStateParser,
-  getSortingStateParser,
-} from '@/lib/data-table/parsers';
+import { getFiltersStateParser, getSortingStateParser } from '@/lib/parsers';
 
-// Task enum values
-export const taskStatusEnum = z.enum([
-  'todo',
-  'in-progress',
-  'done',
-  'canceled',
-]);
-export const taskLabelEnum = z.enum([
-  'bug',
-  'feature',
-  'enhancement',
-  'documentation',
-]);
-export const taskPriorityEnum = z.enum(['low', 'medium', 'high']);
-export const taskSortableColumns = z.enum([
-  'id',
-  'code',
-  'title',
-  'status',
-  'label',
-  'priority',
-  'estimatedHours',
-  'archived',
-  'createdAt',
-  'updatedAt',
-]);
-
-// Get tasks schema (list with pagination, filtering, sorting)
-export const getTasksSchema = z.object({
-  page: z.number().int().min(1).default(1),
-  perPage: z.number().int().min(1).max(100).default(10),
-  title: z.string().optional(),
-  status: z.array(taskStatusEnum).default([]),
-  priority: z.array(taskPriorityEnum).default([]),
-  estimatedHours: z.array(z.number()).default([]),
-  createdAt: z.array(z.number()).default([]),
-  sort: z
-    .array(
-      z.object({
-        id: taskSortableColumns,
-        desc: z.boolean(),
-      }),
-    )
-    .default([{ id: 'createdAt', desc: true }]),
-  filterFlag: z
-    .enum(['advancedFilters', 'commandFilters'])
-    .optional()
-    .nullable(),
-  filters: z.array(z.any()).default([]),
-  joinOperator: z.enum(['and', 'or']).default('and'),
-});
-
-// Get single task schema
-export const getTaskSchema = z.object({
-  id: z.string(),
-});
-
-// Create task schema
-export const createTaskSchema = z.object({
-  title: z.string(),
-  label: taskLabelEnum,
-  status: taskStatusEnum,
-  priority: taskPriorityEnum,
-  estimatedHours: z.number().optional(),
-});
-
-// Update single task schema
-export const updateTaskSchema = z.object({
-  id: z.string(),
-  title: z.string().optional(),
-  label: taskLabelEnum.optional(),
-  status: taskStatusEnum.optional(),
-  priority: taskPriorityEnum.optional(),
-  estimatedHours: z.number().optional(),
-});
-
-// Update multiple tasks schema
-export const updateTasksSchema = z.object({
-  ids: z.array(z.string()),
-  label: taskLabelEnum.optional(),
-  status: taskStatusEnum.optional(),
-  priority: taskPriorityEnum.optional(),
-});
-
-// Delete single task schema
-export const deleteTaskSchema = z.object({
-  id: z.string(),
-});
-
-// Delete multiple tasks schema
-export const deleteTasksSchema = z.object({
-  ids: z.array(z.string()),
-});
-
-// Type exports
-export type TaskStatus = z.infer<typeof taskStatusEnum>;
-export type TaskLabel = z.infer<typeof taskLabelEnum>;
-export type TaskPriority = z.infer<typeof taskPriorityEnum>;
-export type GetTasksInput = z.infer<typeof getTasksSchema>;
-export type GetTaskInput = z.infer<typeof getTaskSchema>;
-export type CreateTaskInput = z.infer<typeof createTaskSchema>;
-export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
-export type UpdateTasksInput = z.infer<typeof updateTasksSchema>;
-export type DeleteTaskInput = z.infer<typeof deleteTaskSchema>;
-export type DeleteTasksInput = z.infer<typeof deleteTasksSchema>;
-
-export const searchParamsCache = createSearchParamsCache({
-  filterFlag: parseAsStringEnum(
-    flagConfig.featureFlags.map((flag) => flag.value),
-  ),
+const searchParamsParsers = {
   page: parseAsInteger.withDefault(1),
   perPage: parseAsInteger.withDefault(10),
   sort: getSortingStateParser<Task>().withDefault([
@@ -137,13 +24,54 @@ export const searchParamsCache = createSearchParamsCache({
   priority: parseAsArrayOf(
     parseAsStringEnum(tasks.priority.enumValues),
   ).withDefault([]),
-  estimatedHours: parseAsArrayOf(parseAsFloat).withDefault([]),
-  createdAt: parseAsArrayOf(parseAsFloat).withDefault([]),
-  // advanced filter
+  estimatedHours: parseAsArrayOf(parseAsInteger).withDefault([]),
+  createdAt: parseAsArrayOf(parseAsString).withDefault([]),
   filters: getFiltersStateParser().withDefault([]),
   joinOperator: parseAsStringEnum(['and', 'or']).withDefault('and'),
+  filterFlag: parseAsStringEnum(['advancedFilters', 'commandFilters']),
+};
+
+export const searchParamsCache = createSearchParamsCache(searchParamsParsers);
+
+export const listTasksSchema = createStandardSchemaV1(searchParamsParsers);
+
+export const getTaskSchema = z.object({
+  id: z.string(),
+});
+
+export const createTaskSchema = z.object({
+  title: z.string(),
+  label: z.enum(tasks.label.enumValues),
+  status: z.enum(tasks.status.enumValues),
+  priority: z.enum(tasks.priority.enumValues),
+  estimatedHours: z.number().optional(),
+});
+
+export const updateTaskSchema = z.object({
+  title: z.string().optional(),
+  label: z.enum(tasks.label.enumValues).optional(),
+  status: z.enum(tasks.status.enumValues).optional(),
+  priority: z.enum(tasks.priority.enumValues).optional(),
+  estimatedHours: z.number().optional(),
+});
+
+export const updateTasksSchema = z.object({
+  ids: z.array(z.string()),
+  label: z.enum(tasks.label.enumValues).optional(),
+  status: z.enum(tasks.status.enumValues).optional(),
+  priority: z.enum(tasks.priority.enumValues).optional(),
+});
+
+export const deleteTaskSchema = z.object({
+  id: z.string(),
+});
+
+export const deleteTasksSchema = z.object({
+  ids: z.array(z.string()),
 });
 
 export type GetTasksSchema = Awaited<
   ReturnType<typeof searchParamsCache.parse>
 >;
+export type CreateTaskSchema = z.infer<typeof createTaskSchema>;
+export type UpdateTaskSchema = z.infer<typeof updateTaskSchema>;

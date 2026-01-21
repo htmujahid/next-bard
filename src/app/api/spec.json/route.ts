@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { generateOpenAPISpec } from '@/lib/openapi/generator';
+import { generateOpenAPISpec } from '@/orpc/generator';
 
 export async function GET() {
   const spec = await generateOpenAPISpec();

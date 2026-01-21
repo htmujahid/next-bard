@@ -1,61 +1,88 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { onError, onSuccess } from '@orpc/client';
-import { useServerAction } from '@orpc/react/hooks';
+import { useTransition } from 'react';
+
+import { useRouter } from 'next/navigation';
+
 import { Loader } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import type { Task } from '@/db/schema';
-import { updateTask } from '@/orpc/actions/tasks/update-task';
-import { type UpdateTaskInput, updateTaskSchema } from '@/validators/tasks';
+import { updateTaskAction } from '@/orpc/actions/tasks/update-task-action';
+import { CreateTaskSchema } from '@/validators/tasks';
 
-import { TaskForm } from './task-form';
+import { TaskFormFields } from './task-form-fields';
 
 interface UpdateTaskFormProps {
-  task: Task | null;
+  task: Task;
 }
 
 export function UpdateTaskForm({ task }: UpdateTaskFormProps) {
-  const form = useForm<Omit<UpdateTaskInput, 'id'>>({
-    resolver: zodResolver(updateTaskSchema.omit({ id: true })),
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const form = useForm<CreateTaskSchema>({
     defaultValues: {
-      title: task?.title ?? '',
-      label: task?.label,
-      status: task?.status,
-      priority: task?.priority,
-      estimatedHours: task?.estimatedHours ?? 0,
+      title: task.title ?? '',
+      label: task.label,
+      status: task.status,
+      priority: task.priority,
+      estimatedHours: task.estimatedHours ?? undefined,
     },
   });
 
-  const { execute, status } = useServerAction(updateTask, {
-    interceptors: [
-      onSuccess(() => {
-        toast.success('Task updated');
-      }),
-      onError((error) => {
-        toast.error(error.message || 'Failed to update task');
-      }),
-    ],
-  });
-
-  const isPending = status === 'pending';
-
-  function onSubmit(input: Omit<UpdateTaskInput, 'id'>) {
-    if (!task) return;
-    execute({ id: task.id, ...input });
-  }
+  const onSubmit = async (value: CreateTaskSchema) => {
+    startTransition(async () => {
+      const [error] = await updateTaskAction({ id: task.id, ...value });
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success('Task updated');
+      router.push('/home/tasks');
+    });
+  };
 
   return (
-    <TaskForm<Omit<UpdateTaskInput, 'id'>> form={form} onSubmit={onSubmit}>
-      <Button disabled={isPending} className="w-fit">
-        {isPending && (
-          <Loader className="mr-2 size-4 animate-spin" aria-hidden="true" />
-        )}
-        Save
-      </Button>
-    </TaskForm>
+    <Card className="mx-auto w-full max-w-3xl">
+      <CardHeader>
+        <CardTitle>Update task</CardTitle>
+        <CardDescription>
+          Update the task details and save the changes
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <FormProvider {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <TaskFormFields />
+            <div className="flex gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push('/home/tasks')}
+              >
+                Cancel
+              </Button>
+              <Button disabled={isPending}>
+                {isPending && <Loader className="mr-2 size-4 animate-spin" />}
+                Save
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+      </CardContent>
+    </Card>
   );
 }

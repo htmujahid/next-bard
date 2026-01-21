@@ -1,51 +1,83 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { isDefinedError, onError, onSuccess } from '@orpc/client';
-import { useServerAction } from '@orpc/react/hooks';
+import { useTransition } from 'react';
+
+import { useRouter } from 'next/navigation';
+
 import { Loader } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { createTask } from '@/orpc/actions/tasks/create-task';
-import { type CreateTaskInput, createTaskSchema } from '@/validators/tasks';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { createTaskAction } from '@/orpc/actions/tasks/create-task-action';
+import { CreateTaskSchema } from '@/validators/tasks';
 
-import { TaskForm } from './task-form';
-import { useRouter } from 'next/navigation';
+import { TaskFormFields } from './task-form-fields';
 
 export function CreateTaskForm() {
   const router = useRouter();
-  const form = useForm<CreateTaskInput>({
-    resolver: zodResolver(createTaskSchema),
+  const [isPending, startTransition] = useTransition();
+
+  const form = useForm<CreateTaskSchema>({
+    defaultValues: {
+      title: '',
+      label: 'bug',
+      status: 'todo',
+      priority: 'low',
+      estimatedHours: undefined,
+    },
   });
 
-  const { execute, status } = useServerAction(createTask, {
-    interceptors: [
-      onSuccess(() => {
-        toast.success('Task created successfully');
-        router.push("/home/tasks");
-      }),
-      onError((error) => {
-        if (isDefinedError(error)) {
-          toast.error(error || 'Failed to create task');
-        }
-      }),
-    ],
-  });
-
-  const isPending = status === 'pending';
-
-  function onSubmit(input: CreateTaskInput) {
-    execute(input);
-  }
+  const onSubmit = (value: CreateTaskSchema) => {
+    startTransition(async () => {
+      const [error] = await createTaskAction(value);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success('Task created');
+      // router.push('/home/tasks')
+    });
+  };
 
   return (
-    <TaskForm form={form} onSubmit={onSubmit}>
-      <Button disabled={isPending} className="w-fit">
-        {isPending && <Loader className="animate-spin" />}
-        Create
-      </Button>
-    </TaskForm>
+    <Card className="mx-auto w-full max-w-3xl">
+      <CardHeader>
+        <CardTitle>Create task</CardTitle>
+        <CardDescription>
+          Fill in the details below to create a new task
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <FormProvider {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <TaskFormFields />
+            <div className="flex gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push('/home/tasks')}
+              >
+                Cancel
+              </Button>
+              <Button disabled={isPending}>
+                {isPending && <Loader className="animate-spin" />}
+                Create
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+      </CardContent>
+    </Card>
   );
 }

@@ -38,13 +38,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useDebouncedCallback } from '@/hooks/use-debounced-callback';
-import {
-  getDefaultFilterOperator,
-  getFilterOperators,
-} from '@/lib/data-table/data-table';
-import { generateId } from '@/lib/data-table/id';
-import { getFiltersStateParser } from '@/lib/data-table/parsers';
+import { getDefaultFilterOperator, getFilterOperators } from '@/lib/data-table';
 import { formatDate } from '@/lib/format';
+import { generateId } from '@/lib/id';
+import { getFiltersStateParser } from '@/lib/parsers';
 import { cn } from '@/lib/utils';
 import type { ExtendedColumnFilter, FilterOperator } from '@/types/data-table';
 
