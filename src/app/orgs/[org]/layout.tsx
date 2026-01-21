@@ -51,6 +51,14 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
     notFound();
   }
 
+  // Set the active organization for this session
+  await auth.api.setActiveOrganization({
+    headers: reqHeaders,
+    body: {
+      organizationId: organization.id,
+    },
+  });
+
   return (
     <SidebarProvider
       style={

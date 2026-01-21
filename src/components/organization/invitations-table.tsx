@@ -32,9 +32,14 @@ export interface Invitation {
 interface InvitationsTableProps {
   promises: Promise<Invitation[]>;
   orgSlug: string;
+  organizationId: string;
 }
 
-export function InvitationsTable({ promises, orgSlug }: InvitationsTableProps) {
+export function InvitationsTable({
+  promises,
+  orgSlug,
+  organizationId,
+}: InvitationsTableProps) {
   const invitations = React.use(promises);
 
   return (
@@ -87,7 +92,10 @@ export function InvitationsTable({ promises, orgSlug }: InvitationsTableProps) {
                   </TableCell>
                   <TableCell>{formatDate(invitation.expiresAt)}</TableCell>
                   <TableCell>
-                    <InvitationsTableActions invitation={invitation} />
+                    <InvitationsTableActions
+                      invitation={invitation}
+                      organizationId={organizationId}
+                    />
                   </TableCell>
                 </TableRow>
               ))

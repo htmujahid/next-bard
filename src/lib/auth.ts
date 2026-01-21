@@ -3,7 +3,9 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
 import { admin, openAPI, organization, twoFactor } from 'better-auth/plugins';
 
+import appConfig from '@/config/app.config';
 import authConfig from '@/config/auth.config';
+import pathsConfig from '@/config/paths.config';
 import { db } from '@/db';
 import * as schema from '@/db/schema';
 import { sendMail } from '@/lib/mailer';
@@ -85,7 +87,23 @@ export const auth = betterAuth({
       ac,
       roles: allRoles,
     }),
-    organization(),
+    organization({
+      async sendInvitationEmail(data) {
+        const inviteLink = `${appConfig.url}${pathsConfig.orgs.acceptInvitation(data.id)}`;
+        await sendMail({
+          to: data.email,
+          subject: `You've been invited to join ${data.organization.name}`,
+          html: `
+            <p>Hi,</p>
+            <p><strong>${data.inviter.user.name}</strong> (${data.inviter.user.email}) has invited you to join <strong>${data.organization.name}</strong> on ${appConfig.name}.</p>
+            <p>Click <a href="${inviteLink}">here</a> to accept the invitation.</p>
+            <p>Or copy and paste the link below into your browser:</p>
+            <p>${inviteLink}</p>
+            <p>This invitation will expire in 48 hours.</p>
+          `,
+        });
+      },
+    }),
     twoFactor({
       otpOptions: {
         sendOTP: async ({ user, otp }) => {

@@ -1,8 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
 
-import { MoreHorizontal, X } from 'lucide-react';
+import { Loader2, MoreHorizontal, RefreshCw, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 import {
@@ -31,12 +32,15 @@ import type { Invitation } from './invitations-table';
 
 interface InvitationsTableActionsProps {
   invitation: Invitation;
+  organizationId: string;
 }
 
 export function InvitationsTableActions({
   invitation,
+  organizationId,
 }: InvitationsTableActionsProps) {
   const router = useRouter();
+  const [resendPending, startResendTransition] = useTransition();
 
   const handleCancelInvitation = async () => {
     await authClient.organization.cancelInvitation(
@@ -53,21 +57,51 @@ export function InvitationsTableActions({
     );
   };
 
+  const handleResendInvitation = () => {
+    startResendTransition(async () => {
+      await authClient.organization.inviteMember(
+        {
+          email: invitation.email,
+          role: invitation.role as 'admin' | 'member',
+          organizationId,
+          resend: true,
+        },
+        {
+          onSuccess: () => {
+            toast.success('Invitation resent successfully');
+            router.refresh();
+          },
+          onError: ({ error }) => {
+            toast.error(error.message);
+          },
+        },
+      );
+    });
+  };
+
   if (invitation.status !== 'pending') {
     return null;
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <AlertDialog>
+    <AlertDialog>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" disabled={resendPending}>
+            {resendPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <MoreHorizontal className="h-4 w-4" />
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleResendInvitation}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Resend Invitation
+          </DropdownMenuItem>
           <AlertDialogTrigger asChild>
             <DropdownMenuItem
               onSelect={(e) => e.preventDefault()}
@@ -77,27 +111,27 @@ export function InvitationsTableActions({
               Cancel Invitation
             </DropdownMenuItem>
           </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Cancel invitation?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to cancel the invitation for{' '}
-                {invitation.email}? They will no longer be able to join the
-                organization with this invitation.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Keep</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleCancelInvitation}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Cancel Invitation
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Cancel invitation?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to cancel the invitation for{' '}
+            {invitation.email}? They will no longer be able to join the
+            organization with this invitation.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Keep</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleCancelInvitation}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Cancel Invitation
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

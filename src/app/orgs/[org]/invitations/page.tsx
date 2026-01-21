@@ -84,7 +84,11 @@ export default async function InvitationsPage({
           </div>
         }
       >
-        <InvitationsTable promises={invitationsPromise} orgSlug={slug} />
+        <InvitationsTable
+          promises={invitationsPromise}
+          orgSlug={slug}
+          organizationId={organization.id}
+        />
       </React.Suspense>
     </Shell>
   );

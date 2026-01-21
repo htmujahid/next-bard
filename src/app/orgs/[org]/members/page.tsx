@@ -94,11 +94,7 @@ export default async function MembersPage({ params }: MembersPageProps) {
           </div>
         }
       >
-        <MembersTable
-          promises={membersPromise}
-          organizationId={organization.id}
-          orgSlug={slug}
-        />
+        <MembersTable promises={membersPromise} orgSlug={slug} />
       </React.Suspense>
     </Shell>
   );

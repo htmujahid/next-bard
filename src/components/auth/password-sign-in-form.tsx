@@ -3,7 +3,7 @@
 import { useTransition } from 'react';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
@@ -28,7 +28,10 @@ import { SignInSchema, signInSchema } from '@/validators/auth';
 
 export function PasswordSignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
+
+  const redirectUrl = searchParams.get('redirect') ?? pathsConfig.app.home;
 
   const form = useForm<SignInSchema>({
     defaultValues: {
@@ -46,7 +49,7 @@ export function PasswordSignInForm() {
           email: data.email,
           password: data.password,
           rememberMe: data.rememberMe,
-          callbackURL: appConfig.url + pathsConfig.app.home,
+          callbackURL: appConfig.url + redirectUrl,
         },
         {
           onSuccess: (context) => {
