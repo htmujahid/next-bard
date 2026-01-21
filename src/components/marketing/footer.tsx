@@ -5,7 +5,7 @@ export async function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer className="w-full py-6">
-      <div className="container px-4 md:px-6">
+      <div className="container mx-auto px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="text-muted-foreground flex items-center justify-center space-x-4 text-sm">
             <Link href="/terms" className="hover:underline">

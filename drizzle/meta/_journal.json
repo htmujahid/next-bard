@@ -15,6 +15,13 @@
       "when": 1747715135530,
       "tag": "0001_soft_loa",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768965601325,
+      "tag": "0002_wild_nitro",
+      "breakpoints": true
     }
   ]
 }

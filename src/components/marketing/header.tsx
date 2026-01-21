@@ -1,18 +1,17 @@
 import { headers } from 'next/headers';
 import Link from 'next/link';
 
-import { UserWithRole } from 'better-auth/plugins';
-
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/auth';
 
-import { NavUser } from './nav-user';
+import { UserDropdown } from '@/components/layout/user-dropdown';
 
 export async function Header() {
   const data = await auth.api.getSession({
     headers: await headers(),
   });
 
+  const session = data?.session;
   const user = data?.user;
 
   return (
@@ -58,7 +57,7 @@ export async function Header() {
       </div>
       <div className="flex flex-1 items-center justify-end gap-2">
         {user ? (
-          <NavUser user={user as UserWithRole} />
+          <UserDropdown user={user} session={session} />
         ) : (
           <>
             <Link href="/auth/sign-in">

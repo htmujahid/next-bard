@@ -18,26 +18,55 @@ const PathsSchema = z.object({
     root: z.string().min(1),
     users: z.string().min(1),
   }),
+  orgs: z.object({
+    root: z.string().min(1),
+    create: z.string().min(1),
+  }),
 });
 
-const pathsConfig = PathsSchema.parse({
-  auth: {
-    signIn: '/auth/sign-in',
-    signUp: '/auth/sign-up',
-    forgotPassword: '/auth/forgot-password',
-    resetPassword: '/auth/reset-password',
-    twoFactor: '/auth/two-factor',
+type PathsConfig = z.infer<typeof PathsSchema> & {
+  orgs: {
+    detail: (slug: string) => string;
+    members: (slug: string) => string;
+    invite: (slug: string) => string;
+    invitations: (slug: string) => string;
+    settings: (slug: string) => string;
+  };
+};
+
+const pathsConfig: PathsConfig = {
+  ...PathsSchema.parse({
+    auth: {
+      signIn: '/auth/sign-in',
+      signUp: '/auth/sign-up',
+      forgotPassword: '/auth/forgot-password',
+      resetPassword: '/auth/reset-password',
+      twoFactor: '/auth/two-factor',
+    },
+    app: {
+      home: '/home',
+      account: '/home/account',
+      security: '/home/security',
+      preferences: '/home/preferences',
+    },
+    admin: {
+      root: '/admin',
+      users: '/admin/users',
+    },
+    orgs: {
+      root: '/orgs',
+      create: '/orgs/create',
+    },
+  }),
+  orgs: {
+    root: '/orgs',
+    create: '/orgs/create',
+    detail: (slug: string) => `/orgs/${slug}`,
+    members: (slug: string) => `/orgs/${slug}/members`,
+    invite: (slug: string) => `/orgs/${slug}/members/invite`,
+    invitations: (slug: string) => `/orgs/${slug}/invitations`,
+    settings: (slug: string) => `/orgs/${slug}/settings`,
   },
-  app: {
-    home: '/home',
-    account: '/home/account',
-    security: '/home/security',
-    preferences: '/home/preferences',
-  },
-  admin: {
-    root: '/admin',
-    users: '/admin/users',
-  },
-} satisfies z.infer<typeof PathsSchema>);
+};
 
 export default pathsConfig;

@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "ba:generate": "npx @better-auth/cli generate",
+    "ba:generate": "npx @better-auth/cli generate --output db/schema/auth-schema.ts --yes",
     "db:push": "npx drizzle-kit push",
     "db:generate": "npx drizzle-kit generate",
     "db:migrate": "npx drizzle-kit migrate",

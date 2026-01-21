@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import {
+  Building2,
   ChevronsUpDown,
+  LayoutDashboard,
   LogOut,
   Palette,
   Shield,
-  ShieldUser,
-  UserCircle,
+  Sparkles,
+  User,
 } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -86,11 +88,34 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
+            <If condition={user?.role?.split(',').includes('admin')}>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <Link href={pathsConfig.admin.root}>
+                  <DropdownMenuItem>
+                    <Sparkles />
+                    Admin
+                  </DropdownMenuItem>
+                </Link>
+              </DropdownMenuGroup>
+            </If>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <Link href={pathsConfig.app.home}>
+                <DropdownMenuItem>
+                  <LayoutDashboard />
+                  Dashboard
+                </DropdownMenuItem>
+              </Link>
+              <Link href={pathsConfig.orgs.root}>
+                <DropdownMenuItem>
+                  <Building2 />
+                  Organizations
+                </DropdownMenuItem>
+              </Link>
               <Link href={pathsConfig.app.account}>
                 <DropdownMenuItem>
-                  <UserCircle />
+                  <User />
                   Account
                 </DropdownMenuItem>
               </Link>
@@ -100,14 +125,6 @@ export function NavUser({
                   Security
                 </DropdownMenuItem>
               </Link>
-              <If condition={user?.role?.split(',').includes('admin')}>
-                <Link href={pathsConfig.admin.root}>
-                  <DropdownMenuItem>
-                    <ShieldUser />
-                    Admin
-                  </DropdownMenuItem>
-                </Link>
-              </If>
               <Link href={pathsConfig.app.preferences}>
                 <DropdownMenuItem>
                   <Palette />
