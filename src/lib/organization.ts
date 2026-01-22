@@ -6,6 +6,8 @@ export const statement = {
     task: ['create', 'read', 'update', 'delete'],
     // ac resource is required for dynamic access control (managing roles)
     ac: ['create', 'read', 'update', 'delete'],
+    // team resource for managing teams
+    team: ['create', 'read', 'update', 'delete'],
 } as const;
 
 export type OrgPermissions = {
@@ -20,6 +22,8 @@ export const ownerRole = oc.newRole({
   ac: ['create', 'read', 'update', 'delete'],
   // Owner has full task permissions
   task: ['create', 'read', 'update', 'delete'],
+  // Owner can manage teams
+  team: ['create', 'read', 'update', 'delete'],
 });
 
 export const adminRole = oc.newRole({
@@ -28,6 +32,8 @@ export const adminRole = oc.newRole({
   ac: ['create', 'read', 'update', 'delete'],
   // Admin has full task permissions
   task: ['create', 'read', 'update', 'delete'],
+  // Admin can manage teams
+  team: ['create', 'read', 'update', 'delete'],
 });
 
 export const memberRole = oc.newRole({
@@ -36,6 +42,8 @@ export const memberRole = oc.newRole({
   ac: ['read'],
   // Members can read tasks
   task: ['read'],
+  // Members can only read teams
+  team: ['read'],
 });
 
 export const allRoles = {

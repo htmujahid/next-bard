@@ -14,6 +14,7 @@ import {
   Settings,
   Shield,
   Users,
+  UsersRound,
 } from 'lucide-react';
 
 import { NavPrimary } from '@/components/sidebar/nav-primary';
@@ -63,6 +64,11 @@ export function OrgSidebar({ user, organization, ...props }: OrgSidebarProps) {
       title: 'Roles',
       url: pathsConfig.orgs.roles(organization.slug),
       icon: Shield,
+    },
+    {
+      title: 'Teams',
+      url: pathsConfig.orgs.teams(organization.slug),
+      icon: UsersRound,
     },
     {
       title: 'Settings',

@@ -15,6 +15,13 @@
       "when": 1769052522877,
       "tag": "0001_tan_naoko",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769056124225,
+      "tag": "0002_lively_rogue",
+      "breakpoints": true
     }
   ]
 }

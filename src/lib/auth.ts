@@ -92,6 +92,9 @@ export const auth = betterAuth({
       dynamicAccessControl: {
         enabled: true,
       },
+      teams: {
+        enabled: true,
+      },
       roles: organizationRoles,
       async sendInvitationEmail(data) {
         const inviteLink = `${appConfig.url}${pathsConfig.orgs.acceptInvitation(data.id)}`;

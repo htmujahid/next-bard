@@ -23,6 +23,9 @@ export const authClient = createAuthClient({
       dynamicAccessControl: {
         enabled: true,
       },
+      teams: {
+        enabled: true,
+      },
       roles: organizationRoles,
     }),
     twoFactorClient(),
