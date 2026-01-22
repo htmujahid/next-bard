@@ -36,6 +36,18 @@ async function getCachedOrganization(reqHeaders: Headers, slug: string) {
   return organization;
 }
 
+async function getCachedOrganizations(reqHeaders: Headers) {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('organizations');
+
+  const organizations = await auth.api.listOrganizations({
+    headers: reqHeaders,
+  });
+
+  return organizations ?? [];
+}
+
 export default async function OrgLayout({ children, params }: OrgLayoutProps) {
   const { org: slug } = await params;
   const reqHeaders = await headers();
@@ -45,7 +57,10 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
     redirect(pathsConfig.auth.signIn);
   }
 
-  const organization = await getCachedOrganization(reqHeaders, slug);
+  const [organization, organizations] = await Promise.all([
+    getCachedOrganization(reqHeaders, slug),
+    getCachedOrganizations(reqHeaders),
+  ]);
 
   if (!organization) {
     notFound();
@@ -76,6 +91,12 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
           slug: organization.slug,
           logo: organization.logo,
         }}
+        organizations={organizations.map((org) => ({
+          id: org.id,
+          name: org.name,
+          slug: org.slug,
+          logo: org.logo,
+        }))}
       />
       <SidebarInset>
         <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
