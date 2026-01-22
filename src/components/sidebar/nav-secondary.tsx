@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import type { Permissions, Role } from '@/lib/roles';
+import type { Permissions, Role } from '@/lib/admin';
 
 export type NavSecondaryItem = {
   title: string;

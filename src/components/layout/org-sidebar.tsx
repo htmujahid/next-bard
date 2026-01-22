@@ -12,6 +12,7 @@ import {
   Mail,
   Plus,
   Settings,
+  Shield,
   Users,
 } from 'lucide-react';
 
@@ -57,6 +58,11 @@ export function OrgSidebar({ user, organization, ...props }: OrgSidebarProps) {
       title: 'Invitations',
       url: pathsConfig.orgs.invitations(organization.slug),
       icon: Mail,
+    },
+    {
+      title: 'Roles',
+      url: pathsConfig.orgs.roles(organization.slug),
+      icon: Shield,
     },
     {
       title: 'Settings',

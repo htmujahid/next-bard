@@ -31,6 +31,9 @@ type PathsConfig = z.infer<typeof PathsSchema> & {
     memberDetail: (slug: string, memberId: string) => string;
     invite: (slug: string) => string;
     invitations: (slug: string) => string;
+    roles: (slug: string) => string;
+    createRole: (slug: string) => string;
+    editRole: (slug: string, roleId: string) => string;
     settings: (slug: string) => string;
     acceptInvitation: (invitationId: string) => string;
   };
@@ -69,6 +72,9 @@ const pathsConfig: PathsConfig = {
       `/orgs/${slug}/members/${memberId}`,
     invite: (slug: string) => `/orgs/${slug}/invitations/create`,
     invitations: (slug: string) => `/orgs/${slug}/invitations`,
+    roles: (slug: string) => `/orgs/${slug}/roles`,
+    createRole: (slug: string) => `/orgs/${slug}/roles/create`,
+    editRole: (slug: string, roleId: string) => `/orgs/${slug}/roles/${roleId}`,
     settings: (slug: string) => `/orgs/${slug}/settings`,
     acceptInvitation: (invitationId: string) => `/orgs/accept/${invitationId}`,
   },

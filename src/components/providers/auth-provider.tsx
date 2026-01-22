@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
 import { authClient } from '@/lib/auth-client';
-import { allRoles } from '@/lib/roles';
+import { allRoles } from '@/lib/admin';
 
 type AuthSession = typeof authClient.$Infer.Session;
 

@@ -5,7 +5,7 @@ import { headers } from 'next/headers';
 import { getSession } from '@/orpc/actions/user/get-session';
 
 import { auth } from './auth';
-import { Permissions, Role } from './roles';
+import { Permissions, Role } from './admin';
 
 export async function authenticate(
   args?:

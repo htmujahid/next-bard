@@ -32,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { authClient } from '@/lib/auth-client';
-import { rolesData } from '@/lib/roles';
+import { rolesData } from '@/lib/admin';
 
 export function UserListActions({ row }: { row: Row<UserWithRole> }) {
   const router = useRouter();

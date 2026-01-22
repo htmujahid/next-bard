@@ -8,7 +8,7 @@ import { DataTableColumnHeader } from '@/components/data-table/data-table-column
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/format';
-import { rolesData } from '@/lib/roles';
+import { rolesData } from '@/lib/admin';
 
 import { UserListActions } from './users-list-actions';
 

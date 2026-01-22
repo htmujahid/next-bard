@@ -23,6 +23,22 @@ async function getCachedOrganization(reqHeaders: Headers, slug: string) {
   });
 }
 
+async function getCachedRoles(reqHeaders: Headers, organizationId: string) {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(`organization-roles-${organizationId}`);
+
+  const roles = await auth.api.listOrgRoles({
+    headers: reqHeaders,
+    query: { organizationId },
+  });
+
+  return (roles ?? []) as Array<{
+    id: string;
+    role: string;
+  }>;
+}
+
 export default async function InvitePage({ params }: InvitePageProps) {
   const { org: slug } = await params;
   const reqHeaders = await headers();
@@ -32,10 +48,16 @@ export default async function InvitePage({ params }: InvitePageProps) {
     return null;
   }
 
+  const customRoles = await getCachedRoles(reqHeaders, organization.id);
+
   return (
     <Shell>
       <div className="mx-auto w-full max-w-md">
-        <InviteMemberForm organizationId={organization.id} orgSlug={slug} />
+        <InviteMemberForm
+          organizationId={organization.id}
+          orgSlug={slug}
+          customRoles={customRoles}
+        />
       </div>
     </Shell>
   );

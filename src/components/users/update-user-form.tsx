@@ -35,7 +35,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { authClient } from '@/lib/auth-client';
-import { type Role, rolesData } from '@/lib/roles';
+import { type Role, rolesData } from '@/lib/admin';
 
 const updateUserSchema = z.object({
   name: z.string().min(1, 'Name is required'),

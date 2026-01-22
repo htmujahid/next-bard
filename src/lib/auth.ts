@@ -1,6 +1,5 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { nextCookies } from 'better-auth/next-js';
 import { admin, openAPI, organization, twoFactor } from 'better-auth/plugins';
 
 import appConfig from '@/config/app.config';
@@ -9,7 +8,8 @@ import pathsConfig from '@/config/paths.config';
 import { db } from '@/db';
 import * as schema from '@/db/schema';
 import { sendMail } from '@/lib/mailer';
-import { ac, allRoles } from '@/lib/roles';
+import { ac, allRoles } from '@/lib/admin';
+import { oc, allRoles as organizationRoles } from '@/lib/organization';
 
 export const auth = betterAuth({
   authConfig,
@@ -88,6 +88,11 @@ export const auth = betterAuth({
       roles: allRoles,
     }),
     organization({
+      ac: oc,
+      dynamicAccessControl: {
+        enabled: true,
+      },
+      roles: organizationRoles,
       async sendInvitationEmail(data) {
         const inviteLink = `${appConfig.url}${pathsConfig.orgs.acceptInvitation(data.id)}`;
         await sendMail({
@@ -119,6 +124,5 @@ export const auth = betterAuth({
       },
     }),
     openAPI({}),
-    nextCookies(),
   ],
 });

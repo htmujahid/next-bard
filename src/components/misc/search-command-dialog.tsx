@@ -15,7 +15,7 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
-import type { Permissions, Role } from '@/lib/roles';
+import type { Permissions, Role } from '@/lib/admin';
 
 export function SearchCommandDialog({
   children,

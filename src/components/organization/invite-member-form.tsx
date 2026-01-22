@@ -1,5 +1,7 @@
 'use client';
 
+import * as React from 'react';
+
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,7 +29,9 @@ import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -36,36 +40,50 @@ import { authClient } from '@/lib/auth-client';
 
 const inviteMemberSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  role: z.enum(['admin', 'member']),
+  role: z.string().min(1, 'Please select a role'),
 });
 
 type InviteMemberFormValues = z.infer<typeof inviteMemberSchema>;
 
+interface CustomRole {
+  id: string;
+  role: string;
+}
+
 interface InviteMemberFormProps {
   organizationId: string;
   orgSlug: string;
+  customRoles?: CustomRole[];
 }
+
+const DEFAULT_ROLES = [
+  { value: 'member', label: 'Member' },
+  { value: 'admin', label: 'Admin' },
+];
 
 export function InviteMemberForm({
   organizationId,
   orgSlug,
+  customRoles = [],
 }: InviteMemberFormProps) {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const form = useForm<InviteMemberFormValues>({
     resolver: zodResolver(inviteMemberSchema),
+    mode: 'onSubmit',
     defaultValues: {
       email: '',
       role: 'member',
     },
   });
 
-  const isSubmitting = form.formState.isSubmitting;
-
   const onSubmit = async (values: InviteMemberFormValues) => {
+    setIsSubmitting(true);
     await authClient.organization.inviteMember(
       {
         email: values.email,
-        role: values.role,
+        role: values.role as 'member' | 'admin' | 'owner',
         organizationId,
       },
       {
@@ -79,7 +97,10 @@ export function InviteMemberForm({
         },
       },
     );
+    setIsSubmitting(false);
   };
+
+  const hasCustomRoles = customRoles.length > 0;
 
   return (
     <Card>
@@ -126,8 +147,32 @@ export function InviteMemberForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="member">Member</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
+                        {hasCustomRoles ? (
+                          <>
+                            <SelectGroup>
+                              <SelectLabel>Default Roles</SelectLabel>
+                              {DEFAULT_ROLES.map((role) => (
+                                <SelectItem key={role.value} value={role.value}>
+                                  {role.label}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                            <SelectGroup>
+                              <SelectLabel>Custom Roles</SelectLabel>
+                              {customRoles.map((role) => (
+                                <SelectItem key={role.id} value={role.role}>
+                                  <span className="capitalize">{role.role}</span>
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </>
+                        ) : (
+                          DEFAULT_ROLES.map((role) => (
+                            <SelectItem key={role.value} value={role.value}>
+                              {role.label}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
