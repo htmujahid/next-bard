@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1769049844238,
-      "tag": "0000_peaceful_nemesis",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1769052522877,
-      "tag": "0001_tan_naoko",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1769056124225,
-      "tag": "0002_lively_rogue",
+      "when": 1769056436488,
+      "tag": "0000_free_marauders",
       "breakpoints": true
     }
   ]
